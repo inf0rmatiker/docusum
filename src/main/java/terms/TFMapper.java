@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -95,9 +96,11 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
       // Iterate over the terms
       for (String term: article.keySet()) {
         int termFreq = article.get(term).getFrequency();
-        double termFrequency = 0.5 + 0.5 * (termFreq/maxTermFreq);
-      }
+        double normalizedTF = 0.5 + 0.5 * ((double)termFreq/(double)maxTermFreq);
 
+        String outValue = String.format(",%f,%s", normalizedTF, term);
+        context.write(new IntWritable(documentId), new Text(outValue));
+      }
     }
   }
 }
