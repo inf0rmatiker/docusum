@@ -1,10 +1,10 @@
 package terms;
 
+import driver.JobDriver.DocumentsCount;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -22,7 +22,6 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
     Integer documentId  = 0; // Default doc ID if it's missing
     String articleTitle = ""; // Default title if it's missing
 
-
     /*
      * Either the first line or the last seems to be empty,
      * so we end up skipping that line if it does not contain "<====>"
@@ -34,12 +33,16 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
       documentId    = Integer.parseInt(splitString[1]);
       line          = splitString[2];
 
-      articles.put(documentId, collectTerms(line));
+      // Skip empty articles
+      if (!line.trim().isEmpty()) {
+        articles.put(documentId, collectTerms(line));
+        context.getCounter(DocumentsCount.NUMDOCS).increment(1); // Increment article count
+      }
     }
   }
 
   /**
-   * Creates a map of terms to Unigram objects, each containing the frequency of the term.
+   * Creates a map of terms to Unigram objects, each containing the frequency of t/s/bach/k/under/cacaleb/CS435/Assignment_2/src/main/java/driverhe term.
    * Also adds an entry, "MAX_FREQ_TERM", referencing the Unigram of maximum frequency for the given article.
    * @param article The stringified article text
    * @return A map of terms
@@ -74,11 +77,18 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
   }
 
 
-  // Add the token to the frequencies map if absent, otherwise increment the token's count
-  // Returns the corresponding Unigram
+  /**
+   * Increments the Unigram frequency count if it is in the map already, otherwise add it and
+   * initialize its count to one.
+   * @param terms Map of String terms to Unigram objects
+   * @param token The current String token being considered
+   * @return The Unigram we either added or incremented
+   */
   private Unigram incrementOrAddUnigram(Map<String, Unigram> terms, String token) {
     if (!terms.containsKey(token)) {
-      return terms.put(token, new Unigram(token));
+      Unigram newUnigram = new Unigram(token);
+      terms.put(token, new Unigram(token));
+      return newUnigram;
     }
 
     terms.get(token).incrementFrequency();
@@ -90,16 +100,18 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
     // Iterate over articles
     for (Integer documentId: articles.keySet()) {
       Map<String, Unigram> article = articles.get(documentId);
-
-      int maxTermFreq = article.get("MAX_FREQ_TERM").getFrequency();
+      double maxTermFreq = (double) article.get("MAX_FREQ_TERM").getFrequency();
 
       // Iterate over the terms
       for (String term: article.keySet()) {
-        int termFreq = article.get(term).getFrequency();
-        double normalizedTF = 0.5 + 0.5 * ((double)termFreq/(double)maxTermFreq);
+        // Don't redundantly write the MAX_FREQ_TERM
+        if (!term.equals("MAX_FREQ_TERM")) {
+          int termFreq = article.get(term).getFrequency();
+          double normalizedTF = 0.5 + 0.5 * (termFreq/maxTermFreq);
 
-        String outValue = String.format(",%f,%s", normalizedTF, term);
-        context.write(new IntWritable(documentId), new Text(outValue));
+          String outValue = String.format(",%s,%f,%d", term, normalizedTF, article.get(term).getFrequency());
+          context.write(new IntWritable(documentId), new Text(outValue));
+        }
       }
     }
   }

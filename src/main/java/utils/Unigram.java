@@ -5,6 +5,8 @@ import org.apache.hadoop.io.Text;
 public class Unigram implements Comparable<Unigram> {
   private Integer frequency;
   private String value;
+  private double normalizedFrequency;
+  private double invertedDocFrequency;
 
   public Unigram() {
     this("", 0);
