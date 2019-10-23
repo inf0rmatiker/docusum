@@ -13,6 +13,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import java.io.IOException;
+import sentences.SentenceMapper;
+import sentences.SentenceReducer;
 import terms.TFMapper;
 import terms.TFReducer;
 
@@ -32,7 +34,7 @@ public class JobDriver {
       Configuration conf = new Configuration();
 
       // Give the MapRed job a name. You'll see this name in the Yarn webapp.
-      Job firstJob = Job.getInstance(conf, "Term Frequencies (Job 1/2)");
+      Job firstJob = Job.getInstance(conf, "Term Frequencies (Job 1/3)");
       // Current class
       firstJob.setJarByClass(JobDriver.class);
       // Mapper
@@ -40,7 +42,7 @@ public class JobDriver {
       // Reducer
       firstJob.setReducerClass(TFReducer.class);
       // --- Use 5 Reducers ---
-      firstJob.setNumReduceTasks(5);
+      firstJob.setNumReduceTasks(10);
       // Outputs from the Mapper.
       firstJob.setMapOutputKeyClass(IntWritable.class);
       firstJob.setMapOutputValueClass(Text.class);
@@ -66,7 +68,7 @@ public class JobDriver {
       /* Collects the TF_ij X IDF_i for all the terms */
 
       // Give the MapRed job a name. You'll see this name in the Yarn webapp.
-      Job secondJob = Job.getInstance(conf, "Inverted Document Frequencies (Job 2/2)");
+      Job secondJob = Job.getInstance(conf, "Inverted Document Frequencies (Job 2/3)");
       Counter documentCount = firstJob.getCounters().findCounter(DocumentsCount.NUMDOCS);
       secondJob.getConfiguration().setLong(documentCount.getDisplayName(), documentCount.getValue());
       // Current class.
@@ -76,7 +78,7 @@ public class JobDriver {
       // Reducer
       secondJob.setReducerClass(IDFReducer.class);
       // --- Use 1 Reducer ---
-      secondJob.setNumReduceTasks(1);
+      secondJob.setNumReduceTasks(10);
       // Outputs from the Mapper.
       secondJob.setMapOutputKeyClass(Text.class);
       secondJob.setMapOutputValueClass(Text.class);
@@ -90,9 +92,41 @@ public class JobDriver {
       // path to output in HDFSargs[0]
       FileOutputFormat.setOutputPath(secondJob, new Path(args[1]));
       // Block until the job is completed.
+      secondJob.waitForCompletion(true);
       System.exit(secondJob.waitForCompletion(true) ? 0 : 1);
 
       /* ========= END JOB 2 ============ */
+
+      /* ========== BEGIN JOB 3 ========== */
+
+      // Give the MapRed job a name. You'll see this name in the Yarn webapp.
+      Job thirdJob = Job.getInstance(conf, "Sentences (Job 3/3)");
+      // Current class.
+      thirdJob.setJarByClass(JobDriver.class);
+      // Mapper
+      thirdJob.setMapperClass(SentenceMapper.class);
+      // Reducer
+      thirdJob.setReducerClass(SentenceReducer.class);
+      // --- Use 1 Reducer ---
+      thirdJob.setNumReduceTasks(5);
+      // Outputs from the Mapper.
+      thirdJob.setMapOutputKeyClass(Text.class);
+      thirdJob.setMapOutputValueClass(Text.class);
+      // Outputs from Reducer. It is sufficient to set only the following two properties
+      // if the Mapper and Reducer has same key and value types. It is set separately for
+      // elaboration.
+      thirdJob.setOutputKeyClass(NullWritable.class);
+      thirdJob.setOutputValueClass(Text.class);
+      // path to input in HDFS
+      FileInputFormat.addInputPath(thirdJob, new Path("/cs435/tmp/"));
+      // path to output in HDFSargs[0]
+      FileOutputFormat.setOutputPath(thirdJob, new Path(args[1]));
+      // Block until the job is completed.
+      System.exit(thirdJob.waitForCompletion(true) ? 0 : 1);
+
+      /* ========= END JOB 3 ============ */
+
+
     } catch (IOException e) {
       System.err.println(e.getMessage());
     } catch (InterruptedException e) {
