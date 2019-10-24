@@ -1,6 +1,6 @@
 package terms;
 
-import driver.JobDriver.DocumentsCount;
+import driver.ProfileA.DocumentsCount;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,12 +31,14 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
       String[] splitString = line.split("<====>");
       articleTitle  = splitString[0];
       documentId    = Integer.parseInt(splitString[1]);
-      line          = splitString[2];
+      if (splitString.length == 3) {
+        line = splitString[2];
 
-      // Skip empty articles
-      if (!line.trim().isEmpty()) {
-        articles.put(documentId, collectTerms(line));
-        context.getCounter(DocumentsCount.NUMDOCS).increment(1); // Increment article count
+        // Skip empty articles
+        if (!line.trim().isEmpty()) {
+          articles.put(documentId, collectTerms(line));
+          context.getCounter(DocumentsCount.NUMDOCS).increment(1); // Increment article count
+        }
       }
     }
   }
@@ -72,8 +74,9 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
 
     if (maxFrequencyTerm != null) {
       terms.put("MAX_FREQ_TERM", maxFrequencyTerm);
+      return terms;
     }
-    return terms;
+    return null;
   }
 
 
@@ -100,19 +103,22 @@ public class TFMapper extends Mapper<LongWritable, Text, IntWritable, Text>{
     // Iterate over articles
     for (Integer documentId: articles.keySet()) {
       Map<String, Unigram> article = articles.get(documentId);
-      double maxTermFreq = (double) article.get("MAX_FREQ_TERM").getFrequency();
+      if (article != null) {
+        double maxTermFreq = (double) article.get("MAX_FREQ_TERM").getFrequency();
 
-      // Iterate over the terms
-      for (String term: article.keySet()) {
-        // Don't redundantly write the MAX_FREQ_TERM
-        if (!term.equals("MAX_FREQ_TERM")) {
-          int termFreq = article.get(term).getFrequency();
-          double normalizedTF = 0.5 + 0.5 * (termFreq/maxTermFreq);
+        // Iterate over the terms
+        for (String term: article.keySet()) {
+          // Don't redundantly write the MAX_FREQ_TERM
+          if (!term.equals("MAX_FREQ_TERM")) {
+            int termFreq = article.get(term).getFrequency();
+            double normalizedTF = 0.5 + 0.5 * (termFreq/maxTermFreq);
 
-          String outValue = String.format(",%s,%f,%d", term, normalizedTF, article.get(term).getFrequency());
-          context.write(new IntWritable(documentId), new Text(outValue));
+            String outValue = String.format(",%s,%f,%d", term, normalizedTF, article.get(term).getFrequency());
+            context.write(new IntWritable(documentId), new Text(outValue));
+          }
         }
       }
+
     }
   }
 }

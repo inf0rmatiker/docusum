@@ -1,21 +1,12 @@
 package idf;
 
-import driver.JobDriver.DocumentsCount;
+import driver.ProfileA;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.JobID;
-import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapreduce.Reducer;
-import utils.Unigram;
 
 public class IDFReducer extends Reducer<Text, Text, NullWritable, Text> {
 
@@ -23,7 +14,7 @@ public class IDFReducer extends Reducer<Text, Text, NullWritable, Text> {
 
   @Override
   protected void setup(Context context) throws IOException, InterruptedException {
-    articleCount = context.getConfiguration().getLong(driver.JobDriver.DocumentsCount.NUMDOCS.name(), 0 );
+    articleCount = context.getConfiguration().getLong(ProfileA.DocumentsCount.NUMDOCS.name(), 0 );
   }
 
   @Override
