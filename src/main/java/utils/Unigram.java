@@ -5,8 +5,8 @@ import org.apache.hadoop.io.Text;
 public class Unigram implements Comparable<Unigram> {
   private Integer frequency;
   private String value;
-  private double normalizedFrequency;
-  private double invertedDocFrequency;
+  private Double normalizedFrequency;
+  private Double tf_idf;
 
   public Unigram() {
     this("", 0);
@@ -25,6 +25,11 @@ public class Unigram implements Comparable<Unigram> {
   public Unigram(String value, Integer frequency) {
     this.value = value;
     this.frequency = frequency;
+  }
+
+  public Unigram(String value, Double tf_idf) {
+    this.tf_idf = tf_idf;
+    this.value = value;
   }
 
   public Integer getFrequency() {
@@ -48,6 +53,14 @@ public class Unigram implements Comparable<Unigram> {
 
   public Text getText() throws NullPointerException {
     return new Text(this.toString());
+  }
+
+  public Double getNormalizedFrequency() {
+    return normalizedFrequency;
+  }
+
+  public Double getTf_idf() {
+    return tf_idf;
   }
 
   // Sort by frequency first, then alphabetic value
