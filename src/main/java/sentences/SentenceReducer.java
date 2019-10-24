@@ -1,5 +1,6 @@
 package sentences;
 
+import com.google.inject.internal.cglib.core.$LocalVariablesSorter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,9 +21,12 @@ import utils.Unigram;
 
 public class SentenceReducer extends Reducer<IntWritable, Text, IntWritable, Text> {
 
-  // Sorts sentences by increasing indexes in their article
+
   public static class IndexComparator implements Comparator<Sentence> {
 
+    /**
+     * Sorts sentences by their original position (index) in the article.
+     */
     @Override
     public int compare(Sentence s1, Sentence s2) {
       if (s1.getIndex() < s2.getIndex()) return -1;
@@ -32,14 +36,25 @@ public class SentenceReducer extends Reducer<IntWritable, Text, IntWritable, Tex
 
   }
 
-  private Double getSentenceTfIdf(String sentence, Article article, Context context) throws IOException, InterruptedException {
+  /**
+   * Calculates the Sentence.TF.IDF score by summing up the top 5 TF.IDF scores of the words within
+   * the sentence. Duplicate words are ignored. If the sentence is less than 5 words, only the
+   * unique words in the sentence are summed.
+   * @param sentence The Sentence object being considered
+   * @param article The Article which contains the sentence. Maintains a lookup table for TF.IDF values
+   *                for each term.
+   * @return A Sentence.TF.IDF Double representing the relevance score for the sentence in question.
+   */
+  private Double getSentenceTfIdf(String sentence, Article article) {
     Double sentenceTfIdf = 0.0;
     PriorityQueue<Double> topFiveWords = new PriorityQueue<>(Collections.reverseOrder());
     Set<String> alreadyConsideredWords = new HashSet<>();
-    String[] sentenceTerms = sentence.split("\\s+"); // Split the words in a sentence
+
+    // Split the words in a sentence
+    String[] sentenceTerms = sentence.split("\\s+");
 
     for (String term: sentenceTerms) {
-      // format the raw term
+      // format the raw term to remove non-alphanumeric characters
       term = term.replaceAll("[^a-zA-Z\\d]", "").toLowerCase().trim();
 
       if (!term.isEmpty()) {
@@ -61,6 +76,14 @@ public class SentenceReducer extends Reducer<IntWritable, Text, IntWritable, Tex
     return sentenceTfIdf;
   }
 
+  /**
+   * Processes an article by finding the top 3 sentences which represent the article.
+   * @param rawArticleText The article text associated with the article
+   * @param article The Article object containing a lookup table for terms and their TF.IDF values
+   * @param context The context we are writing the final output to
+   * @throws IOException
+   * @throws InterruptedException
+   */
   private void processArticle(String rawArticleText, Article article, Context context) throws IOException, InterruptedException {
     if (!rawArticleText.trim().isEmpty()) {
       String[] splitSentences = rawArticleText.split("\\.\\s");
@@ -68,23 +91,40 @@ public class SentenceReducer extends Reducer<IntWritable, Text, IntWritable, Tex
 
       for (int sentenceIndex = 0; sentenceIndex < splitSentences.length; sentenceIndex++) {
         String rawSentence   = splitSentences[sentenceIndex];
-        Double sentenceTfIdf = getSentenceTfIdf(rawSentence, article, context);
+        Double sentenceTfIdf = getSentenceTfIdf(rawSentence, article);
         sortedSentences.add(new Sentence(sentenceTfIdf, rawSentence, sentenceIndex));
       }
 
-      List<Sentence> orderedSentences = new ArrayList<>();
-      int limit = Math.min(3, splitSentences.length);
-      for (int i = 0; i < limit; i++) {
-        Sentence topNthSentence = sortedSentences.poll();
-        orderedSentences.add(topNthSentence);
-      }
+      String summary = topOrderedSentences(sortedSentences);
+      context.write(new IntWritable(article.id), new Text(summary));
+    }
+  }
 
-      Collections.sort(orderedSentences, new IndexComparator());
-      for (Sentence s: orderedSentences) {
-        context.write(new IntWritable(article.id), new Text(s.getSentence()));
-      }
+  /**
+   * Creates a summary of the article by concatenating the top 3 sentences representing that article,
+   * while preserving the original ordering.
+   * @param sortedSentences A PriorityQueue<Sentence> (Max Heap) of Sentence objects, along with their
+   *                        original indexes into the article
+   * @return A single String summary of the article
+   */
+  private String topOrderedSentences(PriorityQueue<Sentence> sortedSentences) {
+    StringBuilder summarySentences = new StringBuilder();
+
+    List<Sentence> orderedSentences = new ArrayList<>();
+    int limit = Math.min(3, sortedSentences.size());
+    for (int i = 0; i < limit; i++) {
+      Sentence topNthSentence = sortedSentences.poll();
+      orderedSentences.add(topNthSentence);
     }
 
+    // Sort sentences by order they appeared in the article, and restore punctuation
+    orderedSentences.sort(new IndexComparator());
+    for (Sentence s: orderedSentences) {
+      summarySentences.append(s.getSentence());
+      summarySentences.append(". ");
+    }
+
+    return summarySentences.toString();
   }
 
   @Override
@@ -96,18 +136,16 @@ public class SentenceReducer extends Reducer<IntWritable, Text, IntWritable, Tex
     for (Text value: values) {
       String valueStr = value.toString();
       String[] valueSplit = valueStr.split(";;");
+
       if (valueStr.contains(";;B;;") && valueSplit.length == 3) {
-        // We are working with the article text
+        // Process the article text
         rawArticleText = valueSplit[2];
       }
       else if (valueStr.contains(";;A;;") && valueSplit.length == 4) {
-        // We are working with a unigram
+        // Process the unigram, adding it to article's HashMap
         String term = valueSplit[2];
         Double termTfIdf = Double.parseDouble(valueSplit[3]);
-
-        Unigram termUnigram = new Unigram(term, termTfIdf);
-        article.addUnigram(term, termUnigram);
-        //context.write(new IntWritable(-1), new Text(term));
+        article.addUnigram(term, new Unigram(term, termTfIdf));
       }
     }
 

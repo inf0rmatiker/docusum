@@ -57,9 +57,6 @@ public class ProfileA {
       // Block until the job is completed.
       firstJob.waitForCompletion(true);
 
-      // Comment out to move on to second job
-      //System.exit(firstJob.waitForCompletion(true) ? 0 : 1);
-
       /* ========= END JOB 2 ============ */
 
 

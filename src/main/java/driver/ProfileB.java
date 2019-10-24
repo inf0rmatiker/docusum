@@ -1,17 +1,11 @@
 package driver;
 
-import driver.ProfileA.DocumentsCount;
-import idf.IDFMapper;
-import idf.IDFReducer;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.chain.ChainMapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -24,12 +18,6 @@ import sentences.TermMapper;
 public class ProfileB {
 
   private static final int NUM_REDUCERS = 10;
-
-  private static void addCacheFiles(Job job) {
-    for (int i = 0; i < NUM_REDUCERS; i++) {
-      job.addCacheFile(new Path("/cs435/tmp2/part-r-0000" + i).toUri());
-    }
-  }
 
   private static void addInputPaths(Job job) {
     MultipleInputs.addInputPath(job, new Path("/cs435/tmp2/"), TextInputFormat.class, TermMapper.class);
@@ -51,10 +39,6 @@ public class ProfileB {
       thirdJob.setJarByClass(ProfileA.class);
       // Mapper
       thirdJob.setMapperClass(SentenceMapper.class);
-
-//      ChainMapper.addMapper(thirdJob, SentenceMapper.class, LongWritable.class, Text.class, IntWritable.class, Text.class, conf);
-//      ChainMapper.addMapper(thirdJob, TermMapper.class, LongWritable.class, Text.class, IntWritable.class, Text.class, conf);
-
       // Reducer
       thirdJob.setReducerClass(SentenceReducer.class);
       thirdJob.setPartitionerClass(ArticlePartitioner.class);
