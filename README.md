@@ -38,7 +38,23 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 
 ---
 
+## Methodology and Implementation
+Here is an explanation of the MapReduce strategy.
+
+### Input
+A 1+ GB dataset of Wikipedia articles formatted as follows:
+
+```
+Langinkoski<====>5538356<====>Langinkoski  Langinkoski is a rapid on the Kymi river in Kotka...
+
+The Sinister Urge (film)<====>5538370<====>The Sinister Urge (film)  The Sinister Urge is a 1960 crime drama ...
+
+Robert Wolfall<====>5538374<====>Robert Wolfall Robert Wolfall was an Anglican ....
+```
+
+As `articleTitle<====>articleID<====>Article text...`, separated by two `\n` characters.
+
 <a name="usage0"></a>
 ## Usage
-Below is an outline of how to run and use the program:
+Here is an outline of how to run and use the program:
 
