@@ -1,8 +1,13 @@
 # Document Summarization using TF/IDF Scores
-*Reference*
+*Credit to Dr. Sangmi Pallickara for providing the requirements of the program. Assignment details can be viewed at:*
+
+[CSU CS435 Webpage](https://www.cs.colostate.edu/~cs435)
 
 ## Summary
 This program takes uses Hadoop's MapReduce to take a dataset of Wikipedia articles, and for each article, output a summary of the article. The summary contains the top 3 sentences that best represent the corresponding article. The sentences' importances are calculated using TF/IDF (Term Frequency / Inverse Document Frequency) scores.
+
+## Usage
+See [Usage](#usage0)
 
 ## Background
 
@@ -26,5 +31,14 @@ Thus, we define **IDF<sub>i</sub>** as:
 We will use both the previous **TF** scores and **IDF** scores to calculate **TF<sub>ij</sub> x IDF<sub>i</sub>** for each term.
 Note: The higher the **TF.IDF** score is, the more important it is for summarizing a document. This prevents words like "is" from becoming extremely important for a given article, because they appear commonly corpus-wide.
 
-### Sentence.TF.IDF
+### Sentence Scores (Sentence.TF.IDF)
+We will calculate the **Sentence.TF.IDF** score for each sentence **S<sub>k</sub>**, by summing the top N terms in the sentence which have the highest **TF.IDF** score. In this version, we use N = 5, but this can be tweaked as needed. In the edge case where a sentence is *less than* 5, we simply sum the **TF.IDF** values for the terms present. Additionally, we do not consider duplicate terms in the sentence. 
+
+This summation gives us our **Sentence.TF.IDF** score, which we use to rank the sentence's relevancy to the document.
+
+---
+
+<a name="usage0"></a>
+## Usage
+Below is an outline of how to run and use the program:
 
