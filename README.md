@@ -11,6 +11,23 @@ See [Usage](#usage0)
 
 ## Background
 
+### Input
+A 1+ GB dataset of Wikipedia articles formatted as follows:
+
+```
+...
+
+Langinkoski<====>5538356<====>Langinkoski  Langinkoski is a rapid on the Kymi river in Kotka...
+
+The Sinister Urge (film)<====>5538370<====>The Sinister Urge (film)  The Sinister Urge is a 1960 crime drama ...
+
+Robert Wolfall<====>5538374<====>Robert Wolfall Robert Wolfall was an Anglican ....
+
+...
+```
+
+As `articleTitle<====>articleID<====>Article text...`, separated by two `\n` characters.
+
 ### Term Frequencies (TF)
 Given a single article **j**, we can calculate the *term frequency* of a given term **i**, denoted **TF<sub>ij</sub>** by the following formula:
 
@@ -39,24 +56,12 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 ---
 
 ## Methodology and Implementation
-Here is an explanation of the MapReduce strategy.
+Here is an explanation of the MapReduce implementation strategy.
 
-### Input
-A 1+ GB dataset of Wikipedia articles formatted as follows:
-
-```
-...
-
-Langinkoski<====>5538356<====>Langinkoski  Langinkoski is a rapid on the Kymi river in Kotka...
-
-The Sinister Urge (film)<====>5538370<====>The Sinister Urge (film)  The Sinister Urge is a 1960 crime drama ...
-
-Robert Wolfall<====>5538374<====>Robert Wolfall Robert Wolfall was an Anglican ....
-
-...
-```
-
-As `articleTitle<====>articleID<====>Article text...`, separated by two `\n` characters.
+To find the **TF** scores for each term in each article, we will do the following:
+- `TFMapper`: 
+   - Input: `<LongWritable key, Text value`, where `value` is `articleTitle<====>articleID<====>articleText...`
+   - Output: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is TODO
 
 <a name="usage0"></a>
 ## Usage
