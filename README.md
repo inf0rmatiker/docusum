@@ -59,16 +59,33 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 Here is an explanation of the MapReduce implementation strategy.
 
 To find the **TF** scores for each term in each article, we use the following MapReduce job:
-- **TFMapper Input**: `<LongWritable key, Text value`, where `value` is `articleTitle<====>articleID<====>articleText...`
-- **TFMapper Output**: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is in the form `,term,TFscore,termFrequency`
+- **TFMapper Input**: `<LongWritable key, Text value`, where `value` is `articleTitle<====>articleID<====>articleText...`.
+- **TFMapper Output**: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is in the form `,term,TFscore,termFrequency`.
    - Since we know that the map function is called once per article, we can create a `Map<String, Unigram>` which maps individual terms to a `Unigram` object, which contains the raw `frequency` and `term`.
    - For every term in the article, we:
       - Add it to the `Map<String, Unigram>` with a frequency of 1 if it doesn't already exist, or
       - Increment the existing frequency of the term's `Unigram` by 1.
    - Once the article is finished being read into this `Map<String, Unigram>`, we can calculate the **TF** scores for each of the terms and write them to `context`.
 
-- `TFReducer`:
-   - *Input*: `<IntWritable key, Iterable<Text> values>`, 
+- **TFReducer Input**: `<IntWritable key, Iterable<Text> values>` where `values` is a list of all the **TF** scores output by the mapper corresponding to the `articleID` denoted by `key`.
+- **TFReducer Output**: `<IntWritable key, Text value>` for each of the values in the `Iterable`.
+
+*Example output*:
+```
+...
+34230	,internationally,0.538462,1
+34230	,received,0.538462,1
+34230	,is,0.615385,3
+34230	,in,0.615385,3
+34230	,commonly,0.538462,1
+34230	,still,0.538462,1
+34230	,which,0.538462,1
+34230	,yt,0.538462,1
+34230	,has,0.538462,1
+34230	,from,0.538462,1
+...
+```
+
 
 <a name="usage0"></a>
 ## Usage
