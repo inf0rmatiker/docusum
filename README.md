@@ -67,6 +67,7 @@ To find the **TF** scores for each term in each article, we use the following Ma
       - Add it to the `Map<String, Unigram>` with a frequency of 1 if it doesn't already exist, or
       - Increment the existing frequency of the term's `Unigram` by 1.
    - Once the article is finished being read into this `Map<String, Unigram>`, we can calculate the **TF** scores for each of the terms and write them to `context`.
+   - We also increment a `Counter` variable, `NUMDOCS` by 1 to count the total number of articles the job comes across.
 
 - **TFReducer Input**: `<IntWritable key, Iterable<Text> values>` where `values` is a list of all the **TF** scores output by the mapper corresponding to the `articleID` denoted by `key`.
 - **TFReducer Output**: `<IntWritable key, Text value>` for each of the values in the `Iterable`.
@@ -88,6 +89,33 @@ To find the **TF** scores for each term in each article, we use the following Ma
 ```
 
 ### TF.IDF Scores
+To find the **TF.IDF** scores, we use the output from the previous MapReduce job as input for this job:
+*Note: we also take in the job Counter enum `NUMDOCS` from the previous job.*
+
+- **IDFMapper Input**: `<LongWritable key, Text value>` where `value` comes in the form `articleId ,term,TFscore,rawFrequency`.
+   - Example: `34230	,in,0.615385,3`
+- **IDFMapper Output**: `<Text term, Text cleanedInput>` where `cleanedInput` is just the original `value` trimmed of whitespace.
+- **IDFReducer Input**: `<Text term, Iterable<Text> values>` where `values` is a list of all the `articleId,term,TFscore,rawFrequency`s for the corresponding term.
+- **IDFReducer Output**: `<NullWritable, Text value>` where `outValue` is the `,articleID,term,TFScore,rawFrequency,termFreqByIDFScore`
+
+*Example Output:*
+```
+...
+,1085363,zyuranger,0.533333,1,2.690608
+,5398388,zyuranger,0.550000,1,2.774691
+,5112538,zyuranger,0.571429,1,2.882798
+,6120428,zyuranger,0.545455,1,2.751762
+,1589980,zyuranger,0.566667,2,2.858775
+,2203370,zyuranger,0.611111,2,3.082990
+,173488,zyuranger,0.590909,2,2.981073
+,749966,zyuskov,0.515625,1,3.002507
+,7722544,zyuskov,0.600000,1,3.493827
+,5894536,zyuzicosa,0.501538,1,3.071456
+,6516037,zywordis,0.600000,1,3.674445
+...
+```
+
+### Sentence TF.IDF Scores
 
 
 <a name="usage0"></a>
