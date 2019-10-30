@@ -58,6 +58,7 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 ## Methodology and Implementation
 Here is an explanation of the MapReduce implementation strategy.
 
+### TF Scores
 To find the **TF** scores for each term in each article, we use the following MapReduce job:
 - **TFMapper Input**: `<LongWritable key, Text value`, where `value` is `articleTitle<====>articleID<====>articleText...`.
 - **TFMapper Output**: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is in the form `,term,TFscore,termFrequency`.
@@ -85,6 +86,8 @@ To find the **TF** scores for each term in each article, we use the following Ma
 34230	,from,0.538462,1
 ...
 ```
+
+### TF.IDF Scores
 
 
 <a name="usage0"></a>
