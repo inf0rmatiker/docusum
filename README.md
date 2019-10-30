@@ -58,10 +58,17 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 ## Methodology and Implementation
 Here is an explanation of the MapReduce implementation strategy.
 
-To find the **TF** scores for each term in each article, we will do the following:
+To find the **TF** scores for each term in each article, we use the following MapReduce job:
 - `TFMapper`: 
    - Input: `<LongWritable key, Text value`, where `value` is `articleTitle<====>articleID<====>articleText...`
-   - Output: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is TODO
+   - Output: `IntWritable key, Text value`, where `key` is the `articleID`, and `value` is in the form `,term,TFscore,termFrequency`
+   
+   - Since we know that the map function is called once per article, we can create a `Map<String, Unigram>` which maps individual terms to a `Unigram` object, which contains the raw `frequency` and `term`.
+   - For every term in the article, we:
+   - Once the article is finished being read into this `Map<String, Unigram>`, we can calculate the **TF** scores for each of the terms and write them to context
+
+- `TFReducer`:
+   - Input: `<IntWritable key, Iterable<Text> values>`, 
 
 <a name="usage0"></a>
 ## Usage
