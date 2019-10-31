@@ -123,9 +123,16 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
 - **SentenceMapper Input**: `<LongWritable key, Text value>` where `value` comes in the form of either:
    - `,articleID,term,TFScore,rawFrequency,termFreqByIDFScore`, or
    - `articleTitle<====>articleID<====>articleText...` (from the original dataset)
-- **SentenceReducer Output**: `<IntWritable articleID, Text value>` where value is either:
+- **SentenceMapper Output**: `<IntWritable articleID, Text value>` where value is either:
    - `;;B;;articleText` if the input is from the original dataset, or
-   - `;;A;;ter;;termTfIdf` if the input was from the previous job.
+   - `;;A;;term;;termTfIdf` if the input was from the previous job.
+- **SentenceReducer Input**: `<IntWritable articleID, Iterable<Text> values>` where values come in as either:
+   - the character 'A', followed by the term and **TF.IDF** for that term
+   - the character 'B', followed by the raw article text
+- **SentenceReducer Output**: `<IntWritable articleID, Text sentences>` where `sentences` are the top M sentences to summarize the article, output in their original order.
+   
+   The reducer iterates once over all the values for a given article, creating an `Article` which maps all its terms to their **TF.IDF** values. Then, for each sentence in the article text, the top N unique **TF.IDF** scores are summed for the sentence, producing a **Sentence.TF.IDF** score, and stored in a `PriorityQueue<Sentence>`, sorted by their scores. Next, the top M sentences are polled from the sorted queue to represent the article. Finally, the top articles are sorted based on their original positions in the article, and output to context.
+
 <a name="usage0"></a>
 ## Usage
 Here is an outline of how to run and use the program:
