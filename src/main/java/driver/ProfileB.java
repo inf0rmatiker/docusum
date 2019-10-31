@@ -20,8 +20,8 @@ public class ProfileB {
   private static final int NUM_REDUCERS = 10;
 
   private static void addInputPaths(Job job) {
-    MultipleInputs.addInputPath(job, new Path("/cs435/tmp2/"), TextInputFormat.class, TermMapper.class);
-    MultipleInputs.addInputPath(job, new Path("/cs435/PA2Dataset/"), TextInputFormat.class, SentenceMapper.class);
+    MultipleInputs.addInputPath(job, new Path("/cs435/tmp2"), TextInputFormat.class, TermMapper.class);
+    MultipleInputs.addInputPath(job, new Path("/cs435/PA2Dataset"), TextInputFormat.class, SentenceMapper.class);
   }
 
   public static void main(String[] args) {
@@ -53,7 +53,7 @@ public class ProfileB {
       thirdJob.setOutputKeyClass(IntWritable.class);
       thirdJob.setOutputValueClass(Text.class);
       // path to input in HDFS
-      FileInputFormat.addInputPath(thirdJob, new Path(args[0]));
+      //FileInputFormat.addInputPath(thirdJob, new Path(args[0]));
       // path to output in HDFSargs[0]
       FileOutputFormat.setOutputPath(thirdJob, new Path(args[1]));
       // Block until the job is completed.

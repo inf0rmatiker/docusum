@@ -53,7 +53,7 @@ public class ProfileA {
       // path to input in HDFS
       FileInputFormat.addInputPath(firstJob, new Path(args[0]));
       // path to output in HDFS
-      FileOutputFormat.setOutputPath(firstJob, new Path("/cs435/tmp/")); // Output results to intermediate folder
+      FileOutputFormat.setOutputPath(firstJob, new Path("/cs435/tmp")); // Output results to intermediate folder
       // Block until the job is completed.
       firstJob.waitForCompletion(true);
 
@@ -84,9 +84,9 @@ public class ProfileA {
       secondJob.setOutputKeyClass(NullWritable.class);
       secondJob.setOutputValueClass(Text.class);
       // path to input in HDFS
-      FileInputFormat.addInputPath(secondJob, new Path("/cs435/tmp/"));
+      FileInputFormat.addInputPath(secondJob, new Path("/cs435/tmp"));
       // path to output in HDFSargs[0]
-      FileOutputFormat.setOutputPath(secondJob, new Path("/cs435/tmp2/"));
+      FileOutputFormat.setOutputPath(secondJob, new Path("/cs435/tmp2"));
       // Block until the job is completed.
       //secondJob.waitForCompletion(true);
       System.exit(secondJob.waitForCompletion(true) ? 0 : 1);
