@@ -3,20 +3,22 @@
 
 [CSU CS435 Webpage](https://www.cs.colostate.edu/~cs435)
 
-## Summary
-This program takes uses Hadoop's MapReduce to take a dataset of Wikipedia articles, and for each article, output a summary of the article. The summary contains the top 3 sentences that best represent the corresponding article. The sentences' importances are calculated using TF/IDF (Term Frequency / Inverse Document Frequency) scores.
-
 # Index
 
 <table>
 <tr>
   <td>
-      <a href="#usage">Usage</a> 
-    | <a href="#background">Gradle</a>
+      <a href="#summary">Summary</a> 
+    | <a href="#usage">Usage</a> 
+    | <a href="#background">Background</a>
     | <a href="#methodology">Methodology</a>
   </td>
 </tr>
 </table>
+
+<a name="summary"></a>
+## Summary
+This program takes uses Hadoop's MapReduce to take a dataset of Wikipedia articles, and for each article, output a summary of the article. The summary contains the top 3 sentences that best represent the corresponding article. The sentences' importances are calculated using TF/IDF (Term Frequency / Inverse Document Frequency) scores.
 
 <a name="background"></a>
 ## Background
