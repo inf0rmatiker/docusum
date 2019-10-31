@@ -147,3 +147,6 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
 ## Usage
 Here is an outline of how to run and use the program:
 
+Prerequisites:
+1. Upload your documents to your HDFS cluster
+
