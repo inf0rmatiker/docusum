@@ -117,7 +117,15 @@ To find the **TF.IDF** scores, we use the output from the previous MapReduce job
 
 ### Sentence TF.IDF Scores
 
+To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapreduce Job as input for this job:
+*Note: This job takes both the original dataset and the output from the previous job as inputs.*
 
+- **SentenceMapper Input**: `<LongWritable key, Text value>` where `value` comes in the form of either:
+   - `,articleID,term,TFScore,rawFrequency,termFreqByIDFScore`, or
+   - `articleTitle<====>articleID<====>articleText...` (from the original dataset)
+- **SentenceReducer Output**: `<IntWritable articleID, Text value>` where value is either:
+   - `;;B;;articleText` if the input is from the original dataset, or
+   - `;;A;;ter;;termTfIdf` if the input was from the previous job.
 <a name="usage0"></a>
 ## Usage
 Here is an outline of how to run and use the program:
