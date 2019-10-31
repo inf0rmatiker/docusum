@@ -161,6 +161,14 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
 ## Usage
 Here is an outline of how to run and use the program:
 
-Prerequisites:
-1. Upload your documents to your HDFS cluster
+*Prerequisites*:
+1. Have a running HDFS cluster and Yarn Resource Manager
+2. Uploaded articles to the HDFS cluster with the format specified in <a href="#background">Input</a>
+3. If not using the `run.sh` script, use `mvn package` to build the jar.
 
+Optionally, you can use the `run.sh` script provided, by providing the input path to your dataset on the cluster, and the output path on cluster in which you wish to store the results:
+- `$ ./run.sh <input_path> <output_path>`
+
+Otherwise, run the jobs by executing your `hadoop jar target/docusum-SNAPSHOT-1.0 driver.ProfileA <input_path>`, followed by `hadoop jar target/docusum-SNAPSHOT-1.0 driver.ProfileB <input_path> <output_path>`
+
+Once both profiles complete, you can view the output at the output path you specified for your cluster.
