@@ -17,7 +17,7 @@ import terms.TFMapper;
 import terms.TFReducer;
 
 public class ProfileA {
-
+  // Change this to optimize number of reducers for your cluster
   private static final int NUM_REDUCERS = 10;
 
   // Global article counter
@@ -32,7 +32,7 @@ public class ProfileA {
 
       Configuration conf = new Configuration();
 
-      // Give the MapRed job a name. You'll see this name in the Yarn webapp.
+      // MapReduce job's name, shows up in the Yarn webapp
       Job firstJob = Job.getInstance(conf, " Profile A: Term Frequencies (Job 1/3)");
       // Current class
       firstJob.setJarByClass(ProfileA.class);
@@ -40,21 +40,18 @@ public class ProfileA {
       firstJob.setMapperClass(TFMapper.class);
       // Reducer
       firstJob.setReducerClass(TFReducer.class);
-      // --- Use 5 Reducers ---
       firstJob.setNumReduceTasks(NUM_REDUCERS);
       // Outputs from the Mapper.
       firstJob.setMapOutputKeyClass(IntWritable.class);
       firstJob.setMapOutputValueClass(Text.class);
-      // Outputs from Reducer. It is sufficient to set only the following two properties
-      // if the Mapper and Reducer has same key and value types. It is set separately for
-      // elaboration.
+      // Outputs from Reducer.
       firstJob.setOutputKeyClass(IntWritable.class);
       firstJob.setOutputValueClass(Text.class);
       // path to input in HDFS
       FileInputFormat.addInputPath(firstJob, new Path(args[0]));
       // path to output in HDFS
-      FileOutputFormat.setOutputPath(firstJob, new Path("/cs435/tmp/")); // Output results to intermediate folder
-      // Block until the job is completed.
+      FileOutputFormat.setOutputPath(firstJob, new Path("/tempOut1")); // Output results to intermediate folder
+      // Block until job is complete.
       firstJob.waitForCompletion(true);
 
       /* ========= END JOB 2 ============ */
@@ -65,30 +62,27 @@ public class ProfileA {
 
       // Give the MapRed job a name. You'll see this name in the Yarn webapp.
       Job secondJob = Job.getInstance(conf, "Profile A: Inverted Document Frequencies (Job 2/3)");
+      // Global NUMDOCS counter from first job
       Counter documentCount = firstJob.getCounters().findCounter(DocumentsCount.NUMDOCS);
       secondJob.getConfiguration().setLong(documentCount.getDisplayName(), documentCount.getValue());
-      // Current class.
+      // Current class
       secondJob.setJarByClass(ProfileA.class);
       // Mapper
       secondJob.setMapperClass(IDFMapper.class);
       // Reducer
       secondJob.setReducerClass(IDFReducer.class);
-      // --- Use 1 Reducer ---
       secondJob.setNumReduceTasks(NUM_REDUCERS);
       // Outputs from the Mapper.
       secondJob.setMapOutputKeyClass(Text.class);
       secondJob.setMapOutputValueClass(Text.class);
-      // Outputs from Reducer. It is sufficient to set only the following two properties
-      // if the Mapper and Reducer has same key and value types. It is set separately for
-      // elaboration.
+      // Outputs from Reducer. 
       secondJob.setOutputKeyClass(NullWritable.class);
       secondJob.setOutputValueClass(Text.class);
-      // path to input in HDFS
-      FileInputFormat.addInputPath(secondJob, new Path("/cs435/tmp/"));
-      // path to output in HDFSargs[0]
-      FileOutputFormat.setOutputPath(secondJob, new Path("/cs435/tmp2/"));
-      // Block until the job is completed.
-      //secondJob.waitForCompletion(true);
+      // path to input in HDFS (intermediate output from first job)
+      FileInputFormat.addInputPath(secondJob, new Path("/tempOut1"));
+      // path to output (intermediate output for this job)
+      FileOutputFormat.setOutputPath(secondJob, new Path("/tempOut2"));
+      // Block until the job is completed, exiting on completion.
       System.exit(secondJob.waitForCompletion(true) ? 0 : 1);
 
     } catch (IOException e) {
