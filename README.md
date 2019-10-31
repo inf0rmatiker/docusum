@@ -133,6 +133,15 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
    
    The reducer iterates once over all the values for a given article, creating an `Article` which maps all its terms to their **TF.IDF** values. Then, for each sentence in the article text, the top N unique **TF.IDF** scores are summed for the sentence, producing a **Sentence.TF.IDF** score, and stored in a `PriorityQueue<Sentence>`, sorted by their scores. Next, the top M sentences are polled from the sorted queue to represent the article. Finally, the top articles are sorted based on their original positions in the article, and output to context.
 
+*Example output:*
+
+```
+...
+116090	South Paris, Maine  South Paris is a census-designated place (CDP) located within the town of Paris in Oxford County, Maine, in the United States.  While the CDP refers only to the densely settled area in the southern part of the town of Paris, the entire town is located within the South Paris ZIP code, resulting in many residents referring to the entire town as South Paris. HistoryDuring the 19th-century, the Little Androscoggin River provided water power to operate mills in South Paris, and the village grew up around them. 
+
+...
+```
+
 <a name="usage0"></a>
 ## Usage
 Here is an outline of how to run and use the program:
