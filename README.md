@@ -6,9 +6,19 @@
 ## Summary
 This program takes uses Hadoop's MapReduce to take a dataset of Wikipedia articles, and for each article, output a summary of the article. The summary contains the top 3 sentences that best represent the corresponding article. The sentences' importances are calculated using TF/IDF (Term Frequency / Inverse Document Frequency) scores.
 
-## Usage
-See [Usage](#usage0)
+# Index
 
+<table>
+<tr>
+  <td>
+      <a href="#usage">Usage</a> 
+    | <a href="#background">Gradle</a>
+    | <a href="#methodology">Methodology</a>
+  </td>
+</tr>
+</table>
+
+<a name="background"></a>
 ## Background
 
 ### Input
@@ -55,6 +65,8 @@ This summation gives us our **Sentence.TF.IDF** score, which we use to rank the 
 
 ---
 
+
+<a name="methodology"></a>
 ## Methodology and Implementation
 Here is an explanation of the MapReduce implementation strategy.
 
@@ -143,7 +155,7 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
 ...
 ```
 
-<a name="usage0"></a>
+<a name="usage"></a>
 ## Usage
 Here is an outline of how to run and use the program:
 
