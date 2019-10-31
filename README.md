@@ -133,12 +133,13 @@ To find the **Sentence.TF.IDF** scores, we use the output from the previous Mapr
    
    The reducer iterates once over all the values for a given article, creating an `Article` which maps all its terms to their **TF.IDF** values. Then, for each sentence in the article text, the top N unique **TF.IDF** scores are summed for the sentence, producing a **Sentence.TF.IDF** score, and stored in a `PriorityQueue<Sentence>`, sorted by their scores. Next, the top M sentences are polled from the sorted queue to represent the article. Finally, the top articles are sorted based on their original positions in the article, and output to context.
 
-*Example output:*
+*Example Output:*
 
 ```
 ...
 116090	South Paris, Maine  South Paris is a census-designated place (CDP) located within the town of Paris in Oxford County, Maine, in the United States.  While the CDP refers only to the densely settled area in the southern part of the town of Paris, the entire town is located within the South Paris ZIP code, resulting in many residents referring to the entire town as South Paris. HistoryDuring the 19th-century, the Little Androscoggin River provided water power to operate mills in South Paris, and the village grew up around them. 
-
+332	Animalia (book)   Animalia is an illustrated children's book by Graeme Base.  Over three million copies have been sold.A special numbered and signed anniversary edition was also published in 1996, with an embossed gold jacket.  SynopsisAnimalia is an alliterative alphabet book and contains twenty-six illustrations, one for each letter of the alphabet. 
+8108021	Latin Grammy Award for Best Pop Vocal Album The Latin Grammy Award for Best Pop Vocal Album was an honor presented at the 1st Latin Grammy Awards, a ceremony that recognizes excellence and creates a wider awareness of cultural diversity and contributions of Latin recording artists in the United States and internationally.The award was given to performers for albums containing at least 51% of new recordings of the pop genre.The award category was given only the first year that the Latin Grammy Awards were presented, along with two more discontinued categories, Female Pop Vocal Performance and Male Pop Vocal Performance, which were created to recognize excellence for singles or album tracks.
 ...
 ```
 
